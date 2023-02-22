@@ -1,4 +1,4 @@
-package ufc.insight.ractivity.model
+package ufc.insight.ractivity.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

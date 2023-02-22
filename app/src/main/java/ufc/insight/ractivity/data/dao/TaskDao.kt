@@ -1,10 +1,10 @@
-package ufc.insight.ractivity.dao
+package ufc.insight.ractivity.data.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import ufc.insight.ractivity.model.TaskModel
+import ufc.insight.ractivity.data.model.TaskModel
 
 @Dao
 interface TaskDao {

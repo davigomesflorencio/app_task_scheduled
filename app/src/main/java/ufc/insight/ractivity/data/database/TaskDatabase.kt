@@ -1,11 +1,11 @@
-package ufc.insight.ractivity.database
+package ufc.insight.ractivity.data.database
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import ufc.insight.ractivity.dao.TaskDao
-import ufc.insight.ractivity.model.TaskModel
+import ufc.insight.ractivity.data.dao.TaskDao
+import ufc.insight.ractivity.data.model.TaskModel
 
 @Database(entities = [TaskModel::class], version = 1)
 abstract class TaskDatabase : RoomDatabase() {
