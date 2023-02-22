@@ -6,14 +6,17 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Environment
+import android.util.Log
 import androidx.core.content.ContextCompat
 import com.opencsv.CSVWriter
 import kotlinx.coroutines.*
-import ufc.insight.ractivity.database.TaskDatabase
-import ufc.insight.ractivity.model.TaskModel
+import ufc.insight.ractivity.data.database.TaskDatabase
+import ufc.insight.ractivity.data.model.TaskModel
+import ufc.insight.ractivity.service.LocationService
 import ufc.insight.ractivity.util.*
 import ufc.insight.ractivity.util.Constants.NOTIFICATION_INTENT_ACTION
 import java.io.BufferedWriter
+import java.io.File
 import java.io.FileWriter
 import java.util.*
 
@@ -30,43 +33,46 @@ class AlarmReceiver : BroadcastReceiver() {
             TaskDatabase.getDatabase(context)
         }
 
-        if (intent.action == NOTIFICATION_INTENT_ACTION && isNetworkAvailable(context)) {
+        if (intent.action == NOTIFICATION_INTENT_ACTION && NetworkUtils.checkConnectivity(context)) {
 
             taskId = intent.extras?.getLong(Constants.ID_TASK)
 
-            GlobalScope.launch(Dispatchers.IO) {
+            prefs = Preferences.getPrefs(context)
+
+            CoroutineScope(Dispatchers.IO).launch {
                 if (taskId != null) {
                     task = db.taskDao().findById(taskId!!)
 
-                    val diff = (Date(task!!.timeEnd).time - Date(task!!.timeStart).time) / 5000
+                    if (task != null) {
+                        val diff = (Date(task!!.timeEnd).time - Date(task!!.timeStart).time) / 5000
 
-                    if (isNetworkAvailable(context)) {
-                        prefs = Preferences.getPrefs(context)
-
-                        sendNotification(context, task!!.name)
+                        sendNotification(context, "Iniciando tarefa " + task!!.name)
 
                         db.taskDao().scheduled(taskId!!)
 
-                        CoroutineScope(Dispatchers.IO).launch {
-                            withTimeout(timeMillis = diff * 5000) {
+                        withTimeout(timeMillis = diff * 5000) {
                             repeat(diff.toInt()) {
                                 writeCSV(task!!.id)
                                 delay(5000)
                             }
-                            }
-                            db.taskDao().finish(taskId!!)
                         }
 
+                        db.taskDao().finishScheduled(taskId!!)
+                        db.taskDao().finish(taskId!!)
+
+                        sendNotification(context, "Tarefa " + task!!.name + " finalizada!")
+
+                    } else {
+                        sendNotification(context, "Dados da tarefa agendada não foram encontrados!")
                     }
                 } else {
-                    sendNotification(context,"A tarefa agendada foi excluida!")
+                    sendNotification(context, "Dados da tarefa agendada não foram encontrados!")
                 }
             }
         }
-
     }
 
-    fun sendNotification(context: Context, nameTask: String) {
+    fun sendNotification(context: Context, messageBody: String) {
         val notificationManager = ContextCompat.getSystemService(
             context,
             NotificationManager::class.java
@@ -74,7 +80,7 @@ class AlarmReceiver : BroadcastReceiver() {
 
         CoroutineScope(Dispatchers.IO).launch {
             notificationManager.sendNotification(
-                "Iniciando tarefa " + nameTask,
+                messageBody,
                 context
             )
         }
@@ -86,24 +92,29 @@ class AlarmReceiver : BroadcastReceiver() {
         val lastLongitude = prefs.getString(Constants.LONGITUDE, null)
 
         if (lastAltitude == null || lastLatitude == null || lastLongitude == null) {
-            LocationUtils.getLocation(prefs)
+            Log.d("LocationTracker", "prefs not found")
         } else {
             val csv =
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + "/" + id + ".csv"
-
+            var dados: Array<String>
+            if (!File(csv).exists()) {
+                dados =
+                    arrayOf(
+                        "Altitude", "Latitude", "Longitude", "Tempo", "Tarefa"
+                    )
+            } else {
+                dados =
+                    arrayOf(
+                        lastAltitude.toString(),
+                        lastLatitude.toString(),
+                        lastLongitude.toString(),
+                        TimeUtils.updateTimeSeconds(System.currentTimeMillis()),
+                        task!!.name
+                    )
+            }
             writer = CSVWriter(BufferedWriter(FileWriter(csv, true)))
-            val dados: Array<String> =
-                arrayOf(
-                    lastAltitude.toString(),
-                    lastLatitude.toString(),
-                    lastLongitude.toString(),
-                    TimeUtils.updateTimeSeconds(System.currentTimeMillis()),
-                    task!!.name
-                )
             writer!!.writeNext(dados)
             writer!!.flush()
         }
-
-
     }
 }
