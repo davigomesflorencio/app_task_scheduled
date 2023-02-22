@@ -160,17 +160,7 @@ class RunTaskActivity : AppCompatActivity(),
                 LocationUtils.soliciteGpsActived(this)
             }
         } else {
-            AlertDialog.Builder(this)
-                .setTitle("ERRO")
-                .setMessage("Permissão de localização necessária!")
-                .setPositiveButton(
-                    "OK"
-                ) { _, _ ->
-                    requestPermissions()
-                    LocationUtils.soliciteGpsActived(this)
-                }
-                .create()
-                .show()
+            requestPermissions()
         }
     }
 
