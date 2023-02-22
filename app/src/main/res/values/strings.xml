@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Schedule task </string>
+    <string name="action_settings">Configurações</string>
+
+    <string name="latitude_label">Latitude: </string>
+    <string name="longitude_label">Longitude: </string>
+
+    <string name="add_ativ">Adicionar Tarefa</string>
+    <string name="hint_word">Nome da Tarefa...</string>
+    <string name="button_save">Salvar Tarefa</string>
+    <string name="empty_not_saved">A tarefa não foi salva porque o nome está vazio</string>
+    <string name="title_activity_new_atividade">Add Schedule task</string>
+
+    <string name="task_channel_id">task_channel</string>
+    <string name="task_channel_name">Task</string>
+</resources>
