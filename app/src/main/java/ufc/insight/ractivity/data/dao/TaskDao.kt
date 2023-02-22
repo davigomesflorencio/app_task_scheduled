@@ -21,6 +21,9 @@ interface TaskDao {
     @Query("Update task_table Set scheduled = 1 where id=:id")
     fun scheduled(id: Long)
 
+    @Query("Update task_table Set scheduled = 0 where id=:id")
+    fun finishScheduled(id: Long)
+
     @Query("Delete from task_table where id=:id")
     fun deleteById(id: Long)
 

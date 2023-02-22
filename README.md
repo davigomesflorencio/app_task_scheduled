@@ -26,6 +26,7 @@ Essas instruções fornecerão uma cópia do projeto em funcionamento em sua má
 - [SharedPreferences](https://developer.android.com/training/data-storage/shared-preferences?hl=pt-br) - Nos permitem armazenar e acessar valores simples.
 - [Notificações](https://developer.android.com/training/notify-user/build-notification?hl=pt-br) - As notificações fornecem informações curtas e oportunas sobre eventos no seu app enquanto ele não está em uso.
 - [OpenCSV](https://opencsv.sourceforge.net/) - É uma biblioteca de CSV (comma-separated values) para uso fácil.
+- [Easy Permissions](https://github.com/googlesamples/easypermissions) - Biblioteca wrapper para simplificar a lógica básica de permissões do sistema ao direcionar o Android M ou superior.
 
 ## 🔨 Construa e execute o aplicativo
 

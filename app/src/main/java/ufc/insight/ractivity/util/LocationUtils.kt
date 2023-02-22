@@ -1,88 +1,32 @@
 package ufc.insight.ractivity.util
 
-import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
-import android.content.SharedPreferences
-import android.location.Location
-import android.os.Looper
-import com.google.android.gms.location.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import android.content.DialogInterface
+import android.content.Intent
+import android.location.LocationManager
+import android.provider.Settings
+import androidx.core.content.ContextCompat.startActivity
 
-object LocationUtils {
+object GpsUtils {
 
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var settingsClient: SettingsClient
-    private lateinit var locationCallback: LocationCallback
-
-
-    fun initializeLocationClients(context: Context, prefs: SharedPreferences) {
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-
-        settingsClient = LocationServices.getSettingsClient(context)
-
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-                val currentLocation = locationResult?.lastLocation
-                getValuesLocation(currentLocation, prefs)
-            }
-        }
+    fun checkGPSEnable(ctx: Context): Boolean {
+        val mLocationManager = ctx.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
     }
 
-    @SuppressLint("MissingPermission")
-    fun getLocation(prefs: SharedPreferences) {
-
-        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-
-            getValuesLocation(location, prefs)
-
-            if (SharedVariables.altitude == null && SharedVariables.latitude == null && SharedVariables.longitude == null) {
-                startLocationUpdates()
-            }
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun startLocationUpdates() {
-        val locationRequest =
-            LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, 5000)
-                .setWaitForAccurateLocation(false)
-                .setMinUpdateIntervalMillis(5000)
-                .setMaxUpdateDelayMillis(5000)
-                .build()
-
-        val locationSettingsRequest =
-            LocationSettingsRequest.Builder().addLocationRequest(locationRequest).build()
-
-        settingsClient.checkLocationSettings(locationSettingsRequest)
-            .addOnSuccessListener {
-                fusedLocationClient.requestLocationUpdates(
-                    locationRequest,
-                    locationCallback,
-                    Looper.getMainLooper()
-                )
-            }
-    }
-
-    private fun saveValuesLocation(prefs: SharedPreferences) {
-        CoroutineScope(Dispatchers.IO).launch {
-            prefs.edit().putString(Constants.ALTITUDE, SharedVariables.altitude).apply()
-            prefs.edit().putString(Constants.LATITUDE, SharedVariables.latitude).apply()
-            prefs.edit().putString(Constants.LONGITUDE, SharedVariables.longitude).apply()
-        }
-    }
-
-    private fun getValuesLocation(
-        location: Location?,
-        prefs: SharedPreferences
-    ) {
-        if (location != null) {
-            SharedVariables.altitude = location.altitude.toString()
-            SharedVariables.latitude = location.latitude.toString()
-            SharedVariables.longitude = location.longitude.toString()
-            saveValuesLocation(prefs)
-        }
-
+    fun soliciteGpsActived(ctx: Context) {
+        val dialogBuilder = AlertDialog.Builder(ctx)
+        dialogBuilder.setMessage("Seu GPS parece estar desativado, deseja ativá-lo?")
+            .setCancelable(false)
+            .setPositiveButton("Sim", DialogInterface.OnClickListener { dialog, id
+                ->
+                startActivity(ctx, Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), null)
+            })
+            .setNegativeButton("Não", DialogInterface.OnClickListener { dialog, id ->
+                dialog.cancel()
+            })
+        val alert = dialogBuilder.create()
+        alert.show()
     }
 }
