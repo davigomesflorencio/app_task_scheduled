@@ -1,23 +1,22 @@
 package ufc.insight.ractivity.ui
 
 import android.Manifest
-import android.app.Activity
 import android.content.Intent
-import android.graphics.*
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 import ufc.insight.ractivity.R
-import ufc.insight.ractivity.database.TaskDatabase
+import ufc.insight.ractivity.data.database.TaskDatabase
+import ufc.insight.ractivity.data.model.TaskModel
 import ufc.insight.ractivity.databinding.ActivityMainBinding
-import ufc.insight.ractivity.model.TaskModel
+import ufc.insight.ractivity.service.LocationService
 import ufc.insight.ractivity.ui.adapter.TaskListAdapter
 
 class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
@@ -67,10 +66,37 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
         }
     }
 
+    private fun startService() {
+        ContextCompat.startForegroundService(this@MainActivity, Intent(
+            this@MainActivity,
+            LocationService::class.java
+        ).also { service ->
+            service.action = LocationService.ACTION_START_FOREGROUND_SERVICE
+        })
+    }
+
+    private fun stopService() {
+        Intent(this, LocationService::class.java).also { service ->
+            service.action = LocationService.ACTION_STOP_FOREGROUND_SERVICE
+            stopService(service)
+        }
+    }
 
     override fun onStart() {
         super.onStart()
         if (!hasLocationPermissions()) {
+            EasyPermissions.requestPermissions(
+                this,
+                "MainActivity",
+                LOCATION_PERMISSION_REQUEST,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+            EasyPermissions.requestPermissions(
+                this,
+                "MainActivity",
+                LOCATION_PERMISSION_REQUEST,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            )
             EasyPermissions.requestPermissions(
                 this,
                 "MainActivity",
@@ -89,6 +115,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
                 LOCATION_PERMISSION_REQUEST,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             )
+        } else {
+            startService()
         }
     }
 
@@ -96,15 +124,14 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
         return EasyPermissions.hasPermissions(
             this, Manifest.permission.ACCESS_FINE_LOCATION
         ) && EasyPermissions.hasPermissions(
+            this, Manifest.permission.ACCESS_COARSE_LOCATION
+        ) && EasyPermissions.hasPermissions(
+            this, Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        ) && EasyPermissions.hasPermissions(
             this, Manifest.permission.READ_EXTERNAL_STORAGE
         ) && EasyPermissions.hasPermissions(
             this, Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
-
-//                && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && EasyPermissions.hasPermissions(
-//            this,
-//            Manifest.permission.ACCESS_BACKGROUND_LOCATION
-//        ))
     }
 
     override fun onRequestPermissionsResult(

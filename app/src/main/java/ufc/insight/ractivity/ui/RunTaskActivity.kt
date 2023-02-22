@@ -7,7 +7,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -23,13 +22,17 @@ import kotlinx.coroutines.launch
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 import ufc.insight.ractivity.R
-import ufc.insight.ractivity.database.TaskDatabase
+import ufc.insight.ractivity.data.database.TaskDatabase
+import ufc.insight.ractivity.data.model.TaskModel
 import ufc.insight.ractivity.databinding.ActivityRunTaskBinding
-import ufc.insight.ractivity.model.TaskModel
 import ufc.insight.ractivity.receiver.AlarmReceiver
-import ufc.insight.ractivity.util.*
+import ufc.insight.ractivity.service.LocationService
 import ufc.insight.ractivity.util.Constants.ID_TASK
 import ufc.insight.ractivity.util.Constants.NOTIFICATION_INTENT_ACTION
+import ufc.insight.ractivity.util.LocationUtils
+import ufc.insight.ractivity.util.NetworkUtils
+import ufc.insight.ractivity.util.TimeUtils
+import ufc.insight.ractivity.util.ToastUtils
 import java.util.*
 
 
@@ -44,7 +47,6 @@ class RunTaskActivity : AppCompatActivity(),
     EasyPermissions.RationaleCallbacks, View.OnClickListener {
 
     private val activityScope = CoroutineScope(Dispatchers.Default)
-    private lateinit var prefs: SharedPreferences
 
     private lateinit var binding: ActivityRunTaskBinding
     private lateinit var btnInit: Button
@@ -69,7 +71,7 @@ class RunTaskActivity : AppCompatActivity(),
                 binding.nameTask.text = task?.name
                 binding.txtHoraFinal.text = TimeUtils.updateTime(task?.timeEnd)
                 binding.txtHoraInicial.text = TimeUtils.updateTime(task?.timeStart)
-                if(task!!.scheduled || task!!.done){
+                if (task!!.scheduled || task!!.done) {
                     btnInit.visibility = View.GONE
                 }
             }
@@ -77,10 +79,13 @@ class RunTaskActivity : AppCompatActivity(),
 
         btnInit.setOnClickListener {
 
-            startLocationUpdates()
+            dialogCheckPermissions()
             btnInit.visibility = View.GONE
 
             if (id != null) {
+                activityScope.launch {
+                    db.taskDao().scheduled(id)
+                }
                 setupAlarmManagerByTask(
                     id,
                     TimeUtils.getHour(task!!.timeStart).toInt(),
@@ -89,30 +94,13 @@ class RunTaskActivity : AppCompatActivity(),
             }
         }
 
-
-        if (isNetworkAvailable(this)) {
-
+        if (NetworkUtils.checkConnectivity(this)) {
             createChannel(
                 getString(R.string.task_channel_id),
                 getString(R.string.task_channel_name)
             )
-
-            prefs = Preferences.getPrefs(this)
-
-            LocationUtils.initializeLocationClients(this, prefs)
-
             if (!checkLocationPermissions()) {
                 requestPermissions()
-            } else {
-                activityScope.launch {
-                    val lastAltitude = prefs.getString(Constants.ALTITUDE, null)
-                    val lastLatitude = prefs.getString(Constants.LATITUDE, null)
-                    val lastLongitude = prefs.getString(Constants.LONGITUDE, null)
-
-                    if (lastAltitude == null || lastLatitude == null || lastLongitude == null) {
-                        LocationUtils.getLocation(prefs)
-                    }
-                }
             }
         } else {
             ToastUtils.showToast(this, "Offline!")
@@ -140,7 +128,7 @@ class RunTaskActivity : AppCompatActivity(),
             PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        alarmManager.setInexactRepeating(
+        alarmManager.setRepeating(
             AlarmManager.RTC_WAKEUP,
             calendar.timeInMillis,
             AlarmManager.INTERVAL_DAY,
@@ -153,12 +141,23 @@ class RunTaskActivity : AppCompatActivity(),
         super.onStart()
         if (!checkPermissions())
             requestPermissions()
+        else startService()
     }
 
-    private fun startLocationUpdates() {
+    private fun startService() {
+        Intent(
+            this@RunTaskActivity,
+            LocationService::class.java
+        ).also { service ->
+            service.action = LocationService.ACTION_START_FOREGROUND_SERVICE
+            startService(service)
+        }
+    }
+
+    private fun dialogCheckPermissions() {
         if (checkPermissions()) {
-            if (!GpsUtils.checkGPSEnable(this)) {
-                GpsUtils.soliciteGpsActived(this)
+            if (!LocationUtils.checkGPSEnable(this)) {
+                LocationUtils.soliciteGpsActived(this)
             }
         } else {
             AlertDialog.Builder(this)
@@ -168,7 +167,7 @@ class RunTaskActivity : AppCompatActivity(),
                     "OK"
                 ) { _, _ ->
                     requestPermissions()
-                    GpsUtils.soliciteGpsActived(this)
+                    LocationUtils.soliciteGpsActived(this)
                 }
                 .create()
                 .show()
@@ -266,8 +265,8 @@ class RunTaskActivity : AppCompatActivity(),
     }
 
     override fun onClick(v: View?) {
-        if (!GpsUtils.checkGPSEnable(this)) {
-            GpsUtils.soliciteGpsActived(this)
+        if (!LocationUtils.checkGPSEnable(this)) {
+            LocationUtils.soliciteGpsActived(this)
         }
     }
 }

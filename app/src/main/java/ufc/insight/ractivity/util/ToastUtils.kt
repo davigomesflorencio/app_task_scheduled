@@ -12,7 +12,5 @@ class ToastUtils {
                 Toast.LENGTH_LONG
             ).show()
         }
-
-
     }
 }

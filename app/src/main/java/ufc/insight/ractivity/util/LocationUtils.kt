@@ -8,7 +8,7 @@ import android.location.LocationManager
 import android.provider.Settings
 import androidx.core.content.ContextCompat.startActivity
 
-object GpsUtils {
+object LocationUtils {
 
     fun checkGPSEnable(ctx: Context): Boolean {
         val mLocationManager = ctx.getSystemService(Context.LOCATION_SERVICE) as LocationManager

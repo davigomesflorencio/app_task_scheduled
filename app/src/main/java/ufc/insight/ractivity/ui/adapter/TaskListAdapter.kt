@@ -4,20 +4,19 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import ufc.insight.ractivity.R
-import ufc.insight.ractivity.database.TaskDatabase
-import ufc.insight.ractivity.model.TaskModel
+import ufc.insight.ractivity.data.database.TaskDatabase
+import ufc.insight.ractivity.data.model.TaskModel
 import ufc.insight.ractivity.ui.RunTaskActivity
 import ufc.insight.ractivity.util.TimeUtils
+import ufc.insight.ractivity.util.ToastUtils
 
 
 class TaskListAdapter(private val list: List<TaskModel>) :
@@ -57,7 +56,7 @@ class TaskListAdapter(private val list: List<TaskModel>) :
             with(itemView) {
                 nameTask.text = task.name
                 txtHora.text = "  " +
-                        TimeUtils.updateTime(task.timeStart) + " -  " + TimeUtils.updateTime(task.timeEnd)
+                        TimeUtils.updateTime(task.timeStart) + " - " + TimeUtils.updateTime(task.timeEnd)
             }
 
             deleteTask.setOnClickListener {
@@ -67,11 +66,9 @@ class TaskListAdapter(private val list: List<TaskModel>) :
             }
 
             editTask.setOnClickListener {
-//                if (!task.done) {
                 val myIntent = Intent(itemView.context, RunTaskActivity::class.java)
                 myIntent.putExtra("id", task.id)
                 startActivity(itemView.context, myIntent, null)
-//                }
             }
 
         }

@@ -14,9 +14,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ufc.insight.ractivity.R
-import ufc.insight.ractivity.database.TaskDatabase
+import ufc.insight.ractivity.data.database.TaskDatabase
 import ufc.insight.ractivity.databinding.ActivityAddTaskBinding
-import ufc.insight.ractivity.model.TaskModel
+import ufc.insight.ractivity.data.model.TaskModel
 import ufc.insight.ractivity.util.ToastUtils
 import java.text.SimpleDateFormat
 import java.time.LocalTime
