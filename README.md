@@ -4,7 +4,25 @@
 
 ## 🌟 Sobre
 
-Um aplicativo simples de gerenciamento de lista de tarefas que ajuda você a fazer as coisas. Construído com o Kotlin, ajuda o usuário a adicionar sua tarefa. Eles podem excluir a tarefa concluída ou toda a tarefa como desejar. Ele salva os dados no banco de dados local usando o ROOM.
+Um aplicativo simples de gerenciamento de lista de tarefas que ajuda você a fazer as coisas. Construído com o Kotlin, ajuda o usuário a adicionar sua tarefa e assim que ela inicia uma notificação é emitida.
+
+Entre o início e o fim da tarefa registrada, a aplicação coleta dados do GPS do dispositivo a cada 5 segundos e grava em um arquivo CSV no dispositivo, com os seguintes atributos (tempo, latitude, longitude, altitude, tarefa).
+
+As tarefas concluídas ou qualquer tarefa podem ser excluidas como desejar. Elas são salvas no banco de dados local usando o ROOM.
+
+## ✨ Screenshots
+
+<div style="display:flex;">
+<img src="assets/images/image1.jpg" width="200">
+<img src="assets/images/image2.jpg" width="200">
+<img src="assets/images/image3.jpg" width="200">
+</div>
+<br>
+<div style="display:flex;">
+<img src="assets/images/image4.jpg" width="200">
+<img src="assets/images/image5.jpg" width="200">
+<img src="assets/images/image6.jpg" width="200">
+</div>
 
 ## 🚀 Introdução
 
