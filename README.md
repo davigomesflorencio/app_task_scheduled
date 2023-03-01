@@ -10,6 +10,17 @@ Entre o início e o fim da tarefa registrada, a aplicação coleta dados do GPS 
 
 As tarefas concluídas ou qualquer tarefa podem ser excluidas como desejar. Elas são salvas no banco de dados local usando o ROOM.
 
+## 👨‍💻 Tecnologias utilizadas
+
+<p>
+
+<img alt="Android" src="https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white">
+<img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-0095D5.svg?style=for-the-badge&logo=Kotlin&logoColor=white">
+<img alt="Android Studio" src="https://img.shields.io/badge/Android%20Studio-008678.svg?style=for-the-badge&logo=android-studio&logoColor=white">
+<img alt="SQLite" src="https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white">
+
+</p>
+
 ## ✨ Screenshots
 
 <div style="display:flex;">
